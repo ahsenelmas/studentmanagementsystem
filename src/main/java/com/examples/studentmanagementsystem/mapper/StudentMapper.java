@@ -26,6 +26,8 @@ public class StudentMapper {
         response.setBirthDate(student.getBirthDate());
         response.setPhone(student.getPhone());
         response.setDepartment(student.getDepartment());
+        response.setCreatedAt(student.getCreatedAt());
+        response.setUpdatedAt(student.getUpdatedAt());
         return response;
     }
 }

@@ -51,7 +51,7 @@ public class AuthController {
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRole() != null ? request.getRole() : Role.STUDENT)
+                .role(Role.STUDENT)
                 .build();
 
         userRepository.save(user);

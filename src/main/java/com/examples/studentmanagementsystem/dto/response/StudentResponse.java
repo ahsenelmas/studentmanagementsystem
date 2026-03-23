@@ -1,6 +1,8 @@
 package com.examples.studentmanagementsystem.dto.response;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,6 +17,8 @@ public class StudentResponse {
     private LocalDate birthDate;
     private String phone;
     private String department;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     // getters & setters
 }
