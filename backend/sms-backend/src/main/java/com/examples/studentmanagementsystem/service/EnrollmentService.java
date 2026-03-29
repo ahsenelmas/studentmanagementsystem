@@ -12,6 +12,8 @@ public interface EnrollmentService {
 
     List<Enrollment> getAllEnrollments();
 
+    Enrollment updateEnrollment(Long id, Enrollment enrollment);
+
     void deleteEnrollment(Long id);
 
     List<Enrollment> getEnrollmentsByStudentId(Long studentId);

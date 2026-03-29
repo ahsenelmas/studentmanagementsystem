@@ -42,6 +42,31 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
+    public Enrollment updateEnrollment(Long id, Enrollment enrollment) {
+        Enrollment existingEnrollment = getEnrollmentById(id);
+
+        Long studentId = enrollment.getStudent().getId();
+        Long courseId = enrollment.getCourse().getId();
+
+        boolean duplicateExists = enrollmentRepository.existsByStudentIdAndCourseId(studentId, courseId);
+
+        boolean samePairAsCurrent =
+                existingEnrollment.getStudent().getId().equals(studentId) &&
+                        existingEnrollment.getCourse().getId().equals(courseId);
+
+        if (duplicateExists && !samePairAsCurrent) {
+            throw new DuplicateResourceException("Student is already enrolled in this course.");
+        }
+
+        existingEnrollment.setEnrollmentDate(enrollment.getEnrollmentDate());
+        existingEnrollment.setStatus(enrollment.getStatus());
+        existingEnrollment.setStudent(enrollment.getStudent());
+        existingEnrollment.setCourse(enrollment.getCourse());
+
+        return enrollmentRepository.save(existingEnrollment);
+    }
+
+    @Override
     public void deleteEnrollment(Long id) {
         Enrollment enrollment = getEnrollmentById(id);
         enrollmentRepository.delete(enrollment);

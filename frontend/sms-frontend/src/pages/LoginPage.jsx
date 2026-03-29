@@ -24,7 +24,7 @@ function LoginPage() {
         setError("");
 
         try {
-            const response = await api.post("/api/auth/login", formData);
+            const response = await api.post("/auth/login", formData);
             localStorage.setItem("token", response.data.token);
             navigate("/dashboard");
         } catch (err) {

@@ -49,6 +49,23 @@ public class EnrollmentController {
         return EnrollmentMapper.toResponse(enrollmentService.createEnrollment(enrollment));
     }
 
+    @Operation(summary = "Update enrollment")
+    @PutMapping("/{id}")
+    public EnrollmentResponse updateEnrollment(@PathVariable Long id,
+                                               @RequestBody @Valid EnrollmentRequest request) {
+
+        Student student = studentService.getStudentById(request.getStudentId());
+        Course course = courseService.getCourseById(request.getCourseId());
+
+        Enrollment enrollment = new Enrollment();
+        enrollment.setEnrollmentDate(request.getEnrollmentDate());
+        enrollment.setStatus(request.getStatus());
+        enrollment.setStudent(student);
+        enrollment.setCourse(course);
+
+        return EnrollmentMapper.toResponse(enrollmentService.updateEnrollment(id, enrollment));
+    }
+
     @Operation(summary = "Get enrollment by ID")
     @GetMapping("/{id}")
     public EnrollmentResponse getEnrollmentById(@PathVariable Long id) {

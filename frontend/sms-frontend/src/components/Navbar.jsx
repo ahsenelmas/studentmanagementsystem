@@ -1,6 +1,7 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 function Navbar() {
+    const location = useLocation();
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -8,14 +9,50 @@ function Navbar() {
         navigate("/login");
     };
 
+    const isActive = (path) => location.pathname === path;
+
     return (
         <nav className="navbar">
-            <h2>Student Management System</h2>
+            <div className="navbar-brand">Student Management System</div>
 
-            <div className="nav-links">
-                <Link to="/dashboard">Dashboard</Link>
-                <Link to="/students">Students</Link>
-                <button onClick={handleLogout}>Logout</button>
+            <div className="navbar-links">
+                <Link
+                    to="/dashboard"
+                    className={`nav-link ${isActive("/dashboard") ? "active-link" : ""}`}
+                >
+                    Dashboard
+                </Link>
+
+                <Link
+                    to="/students"
+                    className={`nav-link ${isActive("/students") ? "active-link" : ""}`}
+                >
+                    Students
+                </Link>
+
+                <Link
+                    to="/courses"
+                    className={`nav-link ${isActive("/courses") ? "active-link" : ""}`}
+                >
+                    Courses
+                </Link>
+
+                <Link
+                    to="/enrollments"
+                    className={`nav-link ${isActive("/enrollments") ? "active-link" : ""}`}
+                >
+                    Enrollments
+                </Link>
+
+                <Link to="/schedules"
+                      className={`nav-link ${isActive("/schedules") ? "active-link" : ""}`}
+                >
+                    Schedules
+                </Link>
+
+                <button onClick={handleLogout} className="logout-btn">
+                    Logout
+                </button>
             </div>
         </nav>
     );
