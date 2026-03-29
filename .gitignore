@@ -1,0 +1,14 @@
+# IntelliJ
+.idea/
+*.iml
+
+# Backend
+backend/sms-backend/target/
+
+# Frontend
+frontend/sms-frontend/node_modules/
+frontend/sms-frontend/dist/
+
+# OS
+Thumbs.db
+.DS_Store
