@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
-@EnableJpaAuditing   // 🔥 THIS LINE IS CRITICAL
+@EnableJpaAuditing
 public class StudentmanagementsystemApplication {
 
     public static void main(String[] args) {
