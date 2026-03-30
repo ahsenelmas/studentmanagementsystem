@@ -17,7 +17,10 @@ function Navbar() {
 
     return (
         <nav className="navbar">
-            <div className="navbar-brand">Student Management System</div>
+            <div className="navbar-brand">
+                <span className="brand-bear">🐻</span>
+                <span>Student Management System</span>
+            </div>
 
             <div className="navbar-links">
                 <Link
