@@ -3,6 +3,9 @@ import axios from "../api/axios";
 import Navbar from "../components/Navbar";
 
 function CoursesPage() {
+    const role = localStorage.getItem("role");
+    const isAdmin = role === "ADMIN";
+
     const [courses, setCourses] = useState([]);
     const [filteredCourses, setFilteredCourses] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
@@ -88,6 +91,8 @@ function CoursesPage() {
     };
 
     const handleEditCourse = (course) => {
+        if (!isAdmin) return;
+
         setIsEditMode(true);
         setEditingCourseId(course.id);
         setShowForm(true);
@@ -100,12 +105,16 @@ function CoursesPage() {
             credit: course.credit || "",
             description: course.description || "",
         });
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
     const handleSubmitCourse = async (e) => {
         e.preventDefault();
         setError("");
         setSuccessMessage("");
+
+        if (!isAdmin) return;
 
         try {
             const payload = {
@@ -151,6 +160,8 @@ function CoursesPage() {
     };
 
     const handleDeleteCourse = async (id) => {
+        if (!isAdmin) return;
+
         const confirmed = window.confirm(
             "Are you sure you want to delete this course?"
         );
@@ -182,6 +193,8 @@ function CoursesPage() {
     };
 
     const handleToggleForm = () => {
+        if (!isAdmin) return;
+
         if (showForm) {
             setShowForm(false);
             resetForm();
@@ -194,6 +207,12 @@ function CoursesPage() {
         }
     };
 
+    const pageBadge = isAdmin ? "Management" : "Student Portal";
+    const pageTitle = isAdmin ? "Courses" : "Courses";
+    const pageSubtitle = isAdmin
+        ? "View and manage the course list in your system."
+        : "Browse available courses in the system.";
+
     return (
         <div className="app-shell">
             <Navbar />
@@ -201,17 +220,17 @@ function CoursesPage() {
             <main className="page-wrapper">
                 <section className="page-header-row">
                     <div>
-                        <p className="section-badge">Management</p>
-                        <h1 className="page-title">Courses</h1>
-                        <p className="page-subtitle">
-                            View and manage the course list in your system.
-                        </p>
+                        <p className="section-badge">{pageBadge}</p>
+                        <h1 className="page-title">{pageTitle}</h1>
+                        <p className="page-subtitle">{pageSubtitle}</p>
                     </div>
 
                     <div className="action-group">
-                        <button className="primary-btn" onClick={handleToggleForm}>
-                            {showForm ? "Close Form" : "Add Course"}
-                        </button>
+                        {isAdmin && (
+                            <button className="primary-btn" onClick={handleToggleForm}>
+                                {showForm ? "Close Form" : "Add Course"}
+                            </button>
+                        )}
 
                         <button className="secondary-btn" onClick={fetchCourses}>
                             Refresh
@@ -219,7 +238,7 @@ function CoursesPage() {
                     </div>
                 </section>
 
-                {showForm && (
+                {showForm && isAdmin && (
                     <section className="content-card form-card">
                         <h2>{isEditMode ? "Edit Course" : "Add New Course"}</h2>
 
@@ -320,7 +339,7 @@ function CoursesPage() {
                                     <th>Course Name</th>
                                     <th>Credit</th>
                                     <th>Description</th>
-                                    <th>Actions</th>
+                                    {isAdmin && <th>Actions</th>}
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -331,23 +350,26 @@ function CoursesPage() {
                                         <td>{course.courseName}</td>
                                         <td>{course.credit}</td>
                                         <td>{course.description || "-"}</td>
-                                        <td>
-                                            <div className="table-actions">
-                                                <button
-                                                    className="edit-btn"
-                                                    onClick={() => handleEditCourse(course)}
-                                                >
-                                                    Edit
-                                                </button>
 
-                                                <button
-                                                    className="danger-btn"
-                                                    onClick={() => handleDeleteCourse(course.id)}
-                                                >
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </td>
+                                        {isAdmin && (
+                                            <td>
+                                                <div className="table-actions">
+                                                    <button
+                                                        className="edit-btn"
+                                                        onClick={() => handleEditCourse(course)}
+                                                    >
+                                                        Edit
+                                                    </button>
+
+                                                    <button
+                                                        className="danger-btn"
+                                                        onClick={() => handleDeleteCourse(course.id)}
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        )}
                                     </tr>
                                 ))}
                                 </tbody>

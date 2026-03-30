@@ -6,12 +6,8 @@ import StudentsPage from "./pages/StudentsPage";
 import CoursesPage from "./pages/CoursesPage";
 import EnrollmentsPage from "./pages/EnrollmentsPage";
 import SchedulesPage from "./pages/SchedulesPage";
-
-
-function ProtectedRoute({ children }) {
-    const token = localStorage.getItem("token");
-    return token ? children : <Navigate to="/login" replace />;
-}
+import ProtectedRoute from "./components/ProtectedRoute";
+import MyCoursesPage from "./pages/MyCoursesPage";
 
 function App() {
     return (
@@ -19,12 +15,11 @@ function App() {
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route path="/schedules" element={<SchedulesPage />} />
 
             <Route
                 path="/dashboard"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={["ADMIN", "STUDENT"]}>
                         <DashboardPage />
                     </ProtectedRoute>
                 }
@@ -33,7 +28,7 @@ function App() {
             <Route
                 path="/students"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={["ADMIN"]}>
                         <StudentsPage />
                     </ProtectedRoute>
                 }
@@ -42,7 +37,7 @@ function App() {
             <Route
                 path="/courses"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={["ADMIN", "STUDENT"]}>
                         <CoursesPage />
                     </ProtectedRoute>
                 }
@@ -51,8 +46,26 @@ function App() {
             <Route
                 path="/enrollments"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={["ADMIN"]}>
                         <EnrollmentsPage />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/my-courses"
+                element={
+                    <ProtectedRoute>
+                        <MyCoursesPage />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/schedules"
+                element={
+                    <ProtectedRoute allowedRoles={["ADMIN", "STUDENT"]}>
+                        <SchedulesPage />
                     </ProtectedRoute>
                 }
             />

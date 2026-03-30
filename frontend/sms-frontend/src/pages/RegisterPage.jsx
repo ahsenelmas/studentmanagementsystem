@@ -27,7 +27,7 @@ function RegisterPage() {
         setError("");
 
         try {
-            const response = await api.post("/api/auth/register", formData);
+            const response = await api.post("/auth/register", formData);
             setMessage(response.data);
             setTimeout(() => navigate("/login"), 1200);
         } catch (err) {

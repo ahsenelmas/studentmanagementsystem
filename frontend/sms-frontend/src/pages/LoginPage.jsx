@@ -25,8 +25,16 @@ function LoginPage() {
 
         try {
             const response = await api.post("/auth/login", formData);
+
             localStorage.setItem("token", response.data.token);
-            navigate("/dashboard");
+            localStorage.setItem("role", response.data.role);
+            localStorage.setItem("username", response.data.username);
+
+            if (response.data.role === "ADMIN") {
+                navigate("/dashboard");
+            } else {
+                navigate("/dashboard");
+            }
         } catch (err) {
             setError(err.response?.data?.message || "Login failed");
         }
