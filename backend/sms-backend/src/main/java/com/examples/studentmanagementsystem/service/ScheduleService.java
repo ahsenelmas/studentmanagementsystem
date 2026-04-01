@@ -20,4 +20,6 @@ public interface ScheduleService {
     List<Schedule> getSchedulesByDay(DayOfWeekEnum dayOfWeek);
 
     List<Schedule> getSchedulesByCourseId(Long courseId);
+
+    List<Schedule> getMySchedules();
 }

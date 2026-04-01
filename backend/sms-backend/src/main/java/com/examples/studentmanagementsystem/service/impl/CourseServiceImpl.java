@@ -5,6 +5,7 @@ import com.examples.studentmanagementsystem.exception.DuplicateResourceException
 import com.examples.studentmanagementsystem.exception.ResourceNotFoundException;
 import com.examples.studentmanagementsystem.repository.CourseRepository;
 import com.examples.studentmanagementsystem.service.CourseService;
+import com.examples.studentmanagementsystem.service.CurrentUserService;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,9 +18,12 @@ import java.util.List;
 public class CourseServiceImpl implements CourseService {
 
     private final CourseRepository courseRepository;
+    private final CurrentUserService currentUserService;
 
-    public CourseServiceImpl(CourseRepository courseRepository) {
+    public CourseServiceImpl(CourseRepository courseRepository,
+                             CurrentUserService currentUserService) {
         this.courseRepository = courseRepository;
+        this.currentUserService = currentUserService;
     }
 
     @Override
@@ -79,5 +83,10 @@ public class CourseServiceImpl implements CourseService {
         Pageable pageable = PageRequest.of(page, size, sort);
         return courseRepository.findAll(pageable);
     }
-}
 
+    @Override
+    public List<Course> getMyCourses() {
+        String username = currentUserService.getCurrentUser().getUsername();
+        return courseRepository.findCoursesByStudentUsername(username);
+    }
+}

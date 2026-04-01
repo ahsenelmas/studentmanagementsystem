@@ -3,7 +3,6 @@ package com.examples.studentmanagementsystem.service;
 import com.examples.studentmanagementsystem.entity.Course;
 import org.springframework.data.domain.Page;
 
-
 import java.util.List;
 
 public interface CourseService {
@@ -21,4 +20,6 @@ public interface CourseService {
     Page<Course> getCoursesPaginated(int page, int size, String sortBy, String direction);
 
     List<Course> searchCoursesByName(String keyword);
+
+    List<Course> getMyCourses();
 }

@@ -3,6 +3,9 @@ import axios from "../api/axios";
 import Navbar from "../components/Navbar";
 
 function EnrollmentsPage() {
+    const role = localStorage.getItem("role");
+    const isAdmin = role === "ADMIN";
+
     const [enrollments, setEnrollments] = useState([]);
     const [filteredEnrollments, setFilteredEnrollments] = useState([]);
     const [students, setStudents] = useState([]);
@@ -40,7 +43,9 @@ function EnrollmentsPage() {
             setLoading(true);
             setError("");
 
-            const response = await axios.get("/enrollments");
+            const endpoint = isAdmin ? "/enrollments" : "/enrollments/my";
+            const response = await axios.get(endpoint);
+
             const enrollmentData = Array.isArray(response.data)
                 ? response.data
                 : response.data.content || [];
@@ -61,6 +66,8 @@ function EnrollmentsPage() {
     };
 
     const fetchStudentsAndCourses = async () => {
+        if (!isAdmin) return;
+
         try {
             setFormLoading(true);
 
@@ -88,8 +95,10 @@ function EnrollmentsPage() {
 
     useEffect(() => {
         fetchEnrollments();
-        fetchStudentsAndCourses();
-    }, []);
+        if (isAdmin) {
+            fetchStudentsAndCourses();
+        }
+    }, [isAdmin]);
 
     const getStudentDisplay = (enrollment) => {
         if (enrollment.student) {
@@ -116,10 +125,16 @@ function EnrollmentsPage() {
     const getCourseDisplay = (enrollment) => {
         if (enrollment.course) {
             return (
-                enrollment.course.courseName ||
-                enrollment.course.courseCode ||
-                "Course"
+                enrollment.course.courseCode && enrollment.course.courseName
+                    ? `${enrollment.course.courseCode} - ${enrollment.course.courseName}`
+                    : enrollment.course.courseName ||
+                    enrollment.course.courseCode ||
+                    "Course"
             );
+        }
+
+        if (enrollment.courseCode && enrollment.courseName) {
+            return `${enrollment.courseCode} - ${enrollment.courseName}`;
         }
 
         if (enrollment.courseName) return enrollment.courseName;
@@ -145,6 +160,8 @@ function EnrollmentsPage() {
     };
 
     useEffect(() => {
+        const lowerSearch = searchTerm.toLowerCase();
+
         const filtered = enrollments.filter((enrollment) => {
             const studentText = getStudentDisplay(enrollment).toLowerCase();
             const courseText = getCourseDisplay(enrollment).toLowerCase();
@@ -153,10 +170,10 @@ function EnrollmentsPage() {
 
             return (
                 String(enrollment.id || "").includes(searchTerm) ||
-                studentText.includes(searchTerm.toLowerCase()) ||
-                courseText.includes(searchTerm.toLowerCase()) ||
-                dateText.includes(searchTerm.toLowerCase()) ||
-                statusText.includes(searchTerm.toLowerCase())
+                studentText.includes(lowerSearch) ||
+                courseText.includes(lowerSearch) ||
+                dateText.includes(lowerSearch) ||
+                statusText.includes(lowerSearch)
             );
         });
 
@@ -172,6 +189,8 @@ function EnrollmentsPage() {
     };
 
     const handleEditEnrollment = (enrollment) => {
+        if (!isAdmin) return;
+
         setIsEditMode(true);
         setEditingEnrollmentId(enrollment.id);
         setShowForm(true);
@@ -184,10 +203,15 @@ function EnrollmentsPage() {
             enrollmentDate: enrollment.enrollmentDate || "",
             status: enrollment.status || "ACTIVE",
         });
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
     const handleSubmitEnrollment = async (e) => {
         e.preventDefault();
+
+        if (!isAdmin) return;
+
         setError("");
         setSuccessMessage("");
 
@@ -235,6 +259,8 @@ function EnrollmentsPage() {
     };
 
     const handleDeleteEnrollment = async (id) => {
+        if (!isAdmin) return;
+
         const confirmed = window.confirm(
             "Are you sure you want to delete this enrollment?"
         );
@@ -266,6 +292,8 @@ function EnrollmentsPage() {
     };
 
     const handleToggleForm = () => {
+        if (!isAdmin) return;
+
         if (showForm) {
             setShowForm(false);
             resetForm();
@@ -285,17 +313,23 @@ function EnrollmentsPage() {
             <main className="page-wrapper">
                 <section className="page-header-row">
                     <div>
-                        <p className="section-badge">Management</p>
+                        <p className="section-badge">
+                            {isAdmin ? "Management" : "Student Portal"}
+                        </p>
                         <h1 className="page-title">Enrollments</h1>
                         <p className="page-subtitle">
-                            Manage student-course enrollments in your system.
+                            {isAdmin
+                                ? "Manage student-course enrollments in your system."
+                                : "View your course enrollments."}
                         </p>
                     </div>
 
                     <div className="action-group">
-                        <button className="primary-btn" onClick={handleToggleForm}>
-                            {showForm ? "Close Form" : "Add Enrollment"}
-                        </button>
+                        {isAdmin && (
+                            <button className="primary-btn" onClick={handleToggleForm}>
+                                {showForm ? "Close Form" : "Add Enrollment"}
+                            </button>
+                        )}
 
                         <button className="secondary-btn" onClick={fetchEnrollments}>
                             Refresh
@@ -303,7 +337,7 @@ function EnrollmentsPage() {
                     </div>
                 </section>
 
-                {showForm && (
+                {showForm && isAdmin && (
                     <section className="content-card form-card">
                         <h2>{isEditMode ? "Edit Enrollment" : "Add New Enrollment"}</h2>
 
@@ -424,7 +458,7 @@ function EnrollmentsPage() {
                                     <th>Course</th>
                                     <th>Enrollment Date</th>
                                     <th>Status</th>
-                                    <th>Actions</th>
+                                    {isAdmin && <th>Actions</th>}
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -435,23 +469,26 @@ function EnrollmentsPage() {
                                         <td>{getCourseDisplay(enrollment)}</td>
                                         <td>{getEnrollmentDate(enrollment)}</td>
                                         <td>{getStatus(enrollment)}</td>
-                                        <td>
-                                            <div className="table-actions">
-                                                <button
-                                                    className="edit-btn"
-                                                    onClick={() => handleEditEnrollment(enrollment)}
-                                                >
-                                                    Edit
-                                                </button>
 
-                                                <button
-                                                    className="danger-btn"
-                                                    onClick={() => handleDeleteEnrollment(enrollment.id)}
-                                                >
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </td>
+                                        {isAdmin && (
+                                            <td>
+                                                <div className="table-actions">
+                                                    <button
+                                                        className="edit-btn"
+                                                        onClick={() => handleEditEnrollment(enrollment)}
+                                                    >
+                                                        Edit
+                                                    </button>
+
+                                                    <button
+                                                        className="danger-btn"
+                                                        onClick={() => handleDeleteEnrollment(enrollment.id)}
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        )}
                                     </tr>
                                 ))}
                                 </tbody>

@@ -4,6 +4,7 @@ import com.examples.studentmanagementsystem.entity.DayOfWeekEnum;
 import com.examples.studentmanagementsystem.entity.Schedule;
 import com.examples.studentmanagementsystem.exception.ResourceNotFoundException;
 import com.examples.studentmanagementsystem.repository.ScheduleRepository;
+import com.examples.studentmanagementsystem.service.CurrentUserService;
 import com.examples.studentmanagementsystem.service.ScheduleService;
 import org.springframework.stereotype.Service;
 
@@ -13,9 +14,12 @@ import java.util.List;
 public class ScheduleServiceImpl implements ScheduleService {
 
     private final ScheduleRepository scheduleRepository;
+    private final CurrentUserService currentUserService;
 
-    public ScheduleServiceImpl(ScheduleRepository scheduleRepository) {
+    public ScheduleServiceImpl(ScheduleRepository scheduleRepository,
+                               CurrentUserService currentUserService) {
         this.scheduleRepository = scheduleRepository;
+        this.currentUserService = currentUserService;
     }
 
     @Override
@@ -62,5 +66,11 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Override
     public List<Schedule> getSchedulesByCourseId(Long courseId) {
         return scheduleRepository.findByCourseId(courseId);
+    }
+
+    @Override
+    public List<Schedule> getMySchedules() {
+        String username = currentUserService.getCurrentUser().getUsername();
+        return scheduleRepository.findSchedulesByStudentUsername(username);
     }
 }

@@ -39,7 +39,8 @@ function CoursesPage() {
             setLoading(true);
             setError("");
 
-            const response = await axios.get("/courses");
+            const endpoint = isAdmin ? "/courses" : "/courses/my";
+            const response = await axios.get(endpoint);
             const courseData = Array.isArray(response.data)
                 ? response.data
                 : response.data.content || [];
@@ -211,7 +212,7 @@ function CoursesPage() {
     const pageTitle = isAdmin ? "Courses" : "Courses";
     const pageSubtitle = isAdmin
         ? "View and manage the course list in your system."
-        : "Browse available courses in the system.";
+        : "Browse your enrolled courses.";
 
     return (
         <div className="app-shell">

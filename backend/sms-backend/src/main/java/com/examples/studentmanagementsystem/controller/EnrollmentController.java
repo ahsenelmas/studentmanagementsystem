@@ -49,6 +49,15 @@ public class EnrollmentController {
         return EnrollmentMapper.toResponse(enrollmentService.createEnrollment(enrollment));
     }
 
+    @Operation(summary = "Get current student's enrollments")
+    @GetMapping("/my")
+    public List<EnrollmentResponse> getMyEnrollments() {
+        return enrollmentService.getMyEnrollments()
+                .stream()
+                .map(EnrollmentMapper::toResponse)
+                .toList();
+    }
+
     @Operation(summary = "Update enrollment")
     @PutMapping("/{id}")
     public EnrollmentResponse updateEnrollment(@PathVariable Long id,

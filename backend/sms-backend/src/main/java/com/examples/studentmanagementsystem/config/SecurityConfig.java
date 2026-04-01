@@ -41,12 +41,18 @@ public class SecurityConfig {
                                 "/v3/api-docs/**"
                         ).permitAll()
 
-                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        .requestMatchers(HttpMethod.GET, "/api/students/**").hasAnyRole("ADMIN", "STUDENT")
-                        .requestMatchers(HttpMethod.GET, "/api/courses/**").hasAnyRole("ADMIN", "STUDENT")
-                        .requestMatchers(HttpMethod.GET, "/api/schedules/**").hasAnyRole("ADMIN", "STUDENT")
-                        .requestMatchers(HttpMethod.GET, "/api/enrollments/**").hasAnyRole("ADMIN", "STUDENT")
+                        // Student self endpoints
+                        .requestMatchers(HttpMethod.GET, "/api/courses/my").hasAnyRole("ADMIN", "STUDENT")
+                        .requestMatchers(HttpMethod.GET, "/api/enrollments/my").hasAnyRole("ADMIN", "STUDENT")
+                        .requestMatchers(HttpMethod.GET, "/api/schedules/my").hasAnyRole("ADMIN", "STUDENT")
+
+                        // Admin-only full reads
+                        .requestMatchers(HttpMethod.GET, "/api/students/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/courses/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/schedules/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/enrollments/**").hasRole("ADMIN")
 
                         .requestMatchers(HttpMethod.POST, "/api/students/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/students/**").hasRole("ADMIN")
@@ -59,7 +65,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/schedules/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/schedules/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/schedules/**").hasRole("ADMIN")
-
 
                         .requestMatchers(HttpMethod.POST, "/api/enrollments/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/enrollments/**").hasRole("ADMIN")

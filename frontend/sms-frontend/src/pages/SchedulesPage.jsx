@@ -33,23 +33,24 @@ function formatTime(time) {
 }
 
 function getHourFromTime(time) {
-    if (!time || !time.includes(":")) return "";
-    return time.split(":")[0];
+    if (!time) return "";
+    const parts = time.split(":");
+    return parts[0] || "";
 }
 
 function getMinuteFromTime(time) {
-    if (!time || !time.includes(":")) return "";
-    return time.split(":")[1];
+    if (!time) return "";
+    const parts = time.split(":");
+    return parts[1] || "";
 }
 
 function updateTimeValue(currentTime, part, newValue) {
-    const currentHour = getHourFromTime(currentTime) || "";
-    const currentMinute = getMinuteFromTime(currentTime) || "";
+    const currentHour = getHourFromTime(currentTime);
+    const currentMinute = getMinuteFromTime(currentTime);
 
     const hour = part === "hour" ? newValue : currentHour;
     const minute = part === "minute" ? newValue : currentMinute;
 
-    if (!hour || !minute) return "";
     return `${hour}:${minute}`;
 }
 
@@ -96,7 +97,6 @@ function TimeSelect({ label, value, onChange }) {
                     ))}
                 </select>
             </div>
-
         </div>
     );
 }
@@ -129,8 +129,10 @@ function SchedulesPage() {
             setLoading(true);
             clearMessages();
 
-            const res = await axios.get("/schedules");
+            const endpoint = isAdmin ? "/schedules" : "/schedules/my";
+            const res = await axios.get(endpoint);
             const data = Array.isArray(res.data) ? res.data : [];
+
             setSchedules(data);
         } catch (err) {
             setError("Failed to load schedules.");
@@ -141,8 +143,10 @@ function SchedulesPage() {
 
     const fetchCourses = async () => {
         try {
-            const res = await axios.get("/courses");
+            const endpoint = isAdmin ? "/courses" : "/courses/my";
+            const res = await axios.get(endpoint);
             const data = Array.isArray(res.data) ? res.data : [];
+
             setCourses(data);
         } catch (err) {
             setError("Failed to load courses.");
@@ -152,7 +156,7 @@ function SchedulesPage() {
     useEffect(() => {
         fetchSchedules();
         fetchCourses();
-    }, []);
+    }, [isAdmin]);
 
     const filteredSchedules = useMemo(() => {
         const term = searchTerm.trim().toLowerCase();
@@ -234,6 +238,16 @@ function SchedulesPage() {
             !formData.courseId
         ) {
             setError("Please fill in all fields.");
+            return false;
+        }
+
+        const startHour = getHourFromTime(formData.startTime);
+        const startMinute = getMinuteFromTime(formData.startTime);
+        const endHour = getHourFromTime(formData.endTime);
+        const endMinute = getMinuteFromTime(formData.endTime);
+
+        if (!startHour || !startMinute || !endHour || !endMinute) {
+            setError("Please select both hour and minute for start time and end time.");
             return false;
         }
 
@@ -351,7 +365,7 @@ function SchedulesPage() {
                         <p className="page-subtitle">
                             {isAdmin
                                 ? "Create, update, and manage course schedules."
-                                : "Browse the weekly timetable and course schedule information."}
+                                : "Browse your personal weekly timetable and course schedule information."}
                         </p>
                     </div>
 
@@ -526,7 +540,7 @@ function SchedulesPage() {
                     <div className="view-header">
                         <h2>Weekly Timetable</h2>
                         <p className="info-text">
-                            A visual weekly view of all schedule entries.
+                            A visual weekly view of your schedule entries.
                         </p>
                     </div>
 

@@ -44,6 +44,15 @@ public class ScheduleController {
         return ScheduleMapper.toResponse(scheduleService.createSchedule(schedule));
     }
 
+    @Operation(summary = "Get current student's schedules")
+    @GetMapping("/my")
+    public List<ScheduleResponse> getMySchedules() {
+        return scheduleService.getMySchedules()
+                .stream()
+                .map(ScheduleMapper::toResponse)
+                .toList();
+    }
+
     @Operation(summary = "Get schedule by ID")
     @GetMapping("/{id}")
     public ScheduleResponse getScheduleById(@PathVariable Long id) {

@@ -4,6 +4,7 @@ import com.examples.studentmanagementsystem.entity.Enrollment;
 import com.examples.studentmanagementsystem.exception.DuplicateResourceException;
 import com.examples.studentmanagementsystem.exception.ResourceNotFoundException;
 import com.examples.studentmanagementsystem.repository.EnrollmentRepository;
+import com.examples.studentmanagementsystem.service.CurrentUserService;
 import com.examples.studentmanagementsystem.service.EnrollmentService;
 import org.springframework.stereotype.Service;
 
@@ -13,9 +14,12 @@ import java.util.List;
 public class EnrollmentServiceImpl implements EnrollmentService {
 
     private final EnrollmentRepository enrollmentRepository;
+    private final CurrentUserService currentUserService;
 
-    public EnrollmentServiceImpl(EnrollmentRepository enrollmentRepository) {
+    public EnrollmentServiceImpl(EnrollmentRepository enrollmentRepository,
+                                 CurrentUserService currentUserService) {
         this.enrollmentRepository = enrollmentRepository;
+        this.currentUserService = currentUserService;
     }
 
     @Override
@@ -80,5 +84,11 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     @Override
     public List<Enrollment> getEnrollmentsByCourseId(Long courseId) {
         return enrollmentRepository.findByCourseId(courseId);
+    }
+
+    @Override
+    public List<Enrollment> getMyEnrollments() {
+        String username = currentUserService.getCurrentUser().getUsername();
+        return enrollmentRepository.findByStudentUserUsername(username);
     }
 }

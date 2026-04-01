@@ -31,6 +31,15 @@ public class CourseController {
         return CourseMapper.toResponse(courseService.createCourse(course));
     }
 
+    @Operation(summary = "Get current student's courses")
+    @GetMapping("/my")
+    public List<CourseResponse> getMyCourses() {
+        return courseService.getMyCourses()
+                .stream()
+                .map(CourseMapper::toResponse)
+                .toList();
+    }
+
     @Operation(summary = "Get course by ID")
     @GetMapping("/{id}")
     public CourseResponse getCourseById(@PathVariable Long id) {
