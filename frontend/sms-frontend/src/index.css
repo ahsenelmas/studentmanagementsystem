@@ -555,6 +555,30 @@ textarea {
     background: linear-gradient(135deg, var(--primary-dark), var(--primary));
 }
 
+.time-select-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.time-select-row select {
+    flex: 1;
+}
+
+.time-separator {
+    font-size: 20px;
+    font-weight: 700;
+    color: #5b4636;
+    margin-top: -2px;
+}
+
+.input-hint {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: #8a8f98;
+}
+
 .error {
     color: var(--danger);
     font-weight: 700;

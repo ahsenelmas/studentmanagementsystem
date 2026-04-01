@@ -21,9 +21,84 @@ const WEEK_DAYS = [
     "SUNDAY",
 ];
 
+const HOURS = Array.from({ length: 24 }, (_, i) =>
+    String(i).padStart(2, "0")
+);
+
+const MINUTES = ["00", "10", "20", "30", "40", "50"];
+
 function formatTime(time) {
     if (!time) return "";
     return String(time).slice(0, 5);
+}
+
+function getHourFromTime(time) {
+    if (!time || !time.includes(":")) return "";
+    return time.split(":")[0];
+}
+
+function getMinuteFromTime(time) {
+    if (!time || !time.includes(":")) return "";
+    return time.split(":")[1];
+}
+
+function updateTimeValue(currentTime, part, newValue) {
+    const currentHour = getHourFromTime(currentTime) || "";
+    const currentMinute = getMinuteFromTime(currentTime) || "";
+
+    const hour = part === "hour" ? newValue : currentHour;
+    const minute = part === "minute" ? newValue : currentMinute;
+
+    if (!hour || !minute) return "";
+    return `${hour}:${minute}`;
+}
+
+function TimeSelect({ label, value, onChange }) {
+    const selectedHour = getHourFromTime(value);
+    const selectedMinute = getMinuteFromTime(value);
+
+    return (
+        <div className="form-group">
+            <label>{label}</label>
+
+            <div className="time-select-row">
+                <select
+                    className="modern-select"
+                    value={selectedHour}
+                    onChange={(e) =>
+                        onChange(updateTimeValue(value, "hour", e.target.value))
+                    }
+                    required
+                >
+                    <option value="">Hour</option>
+                    {HOURS.map((hour) => (
+                        <option key={hour} value={hour}>
+                            {hour}
+                        </option>
+                    ))}
+                </select>
+
+                <span className="time-separator">:</span>
+
+                <select
+                    className="modern-select"
+                    value={selectedMinute}
+                    onChange={(e) =>
+                        onChange(updateTimeValue(value, "minute", e.target.value))
+                    }
+                    required
+                >
+                    <option value="">Min</option>
+                    {MINUTES.map((minute) => (
+                        <option key={minute} value={minute}>
+                            {minute}
+                        </option>
+                    ))}
+                </select>
+            </div>
+
+        </div>
+    );
 }
 
 function SchedulesPage() {
@@ -40,7 +115,6 @@ function SchedulesPage() {
     const [successMessage, setSuccessMessage] = useState("");
     const [showForm, setShowForm] = useState(false);
     const [editingScheduleId, setEditingScheduleId] = useState(null);
-
     const [formData, setFormData] = useState(initialFormData);
 
     const isEditing = editingScheduleId !== null;
@@ -83,7 +157,7 @@ function SchedulesPage() {
     const filteredSchedules = useMemo(() => {
         const term = searchTerm.trim().toLowerCase();
 
-        let result = schedules.filter((schedule) => {
+        const result = schedules.filter((schedule) => {
             const day = schedule.dayOfWeek?.toLowerCase() || "";
             const room = schedule.room?.toLowerCase() || "";
             const semester = schedule.semester?.toLowerCase() || "";
@@ -332,27 +406,27 @@ function SchedulesPage() {
                                     </select>
                                 </div>
 
-                                <div className="form-group">
-                                    <label>Start Time</label>
-                                    <input
-                                        type="time"
-                                        name="startTime"
-                                        value={formData.startTime}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </div>
+                                <TimeSelect
+                                    label="Start Time"
+                                    value={formData.startTime}
+                                    onChange={(newTime) =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            startTime: newTime,
+                                        }))
+                                    }
+                                />
 
-                                <div className="form-group">
-                                    <label>End Time</label>
-                                    <input
-                                        type="time"
-                                        name="endTime"
-                                        value={formData.endTime}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                </div>
+                                <TimeSelect
+                                    label="End Time"
+                                    value={formData.endTime}
+                                    onChange={(newTime) =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            endTime: newTime,
+                                        }))
+                                    }
+                                />
 
                                 <div className="form-group">
                                     <label>Room</label>
@@ -482,8 +556,7 @@ function SchedulesPage() {
                                                     </h3>
 
                                                     <p className="schedule-time">
-                                                        {formatTime(schedule.startTime)} -{" "}
-                                                        {formatTime(schedule.endTime)}
+                                                        {formatTime(schedule.startTime)} - {formatTime(schedule.endTime)}
                                                     </p>
 
                                                     <p className="schedule-semester">
