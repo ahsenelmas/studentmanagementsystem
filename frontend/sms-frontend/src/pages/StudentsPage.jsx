@@ -206,7 +206,6 @@ function StudentsPage() {
 
     return (
         <div className="app-shell">
-            <Navbar />
 
             <main className="page-wrapper">
                 <section className="page-header-row">

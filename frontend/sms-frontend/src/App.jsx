@@ -8,19 +8,24 @@ import EnrollmentsPage from "./pages/EnrollmentsPage";
 import SchedulesPage from "./pages/SchedulesPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import MyCoursesPage from "./pages/MyCoursesPage";
+import Layout from "./components/Layout";
 
 function App() {
     return (
         <Routes>
+            {/* PUBLIC */}
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
+            {/* PROTECTED + LAYOUT */}
             <Route
                 path="/dashboard"
                 element={
                     <ProtectedRoute allowedRoles={["ADMIN", "STUDENT"]}>
-                        <DashboardPage />
+                        <Layout>
+                            <DashboardPage />
+                        </Layout>
                     </ProtectedRoute>
                 }
             />
@@ -29,7 +34,9 @@ function App() {
                 path="/students"
                 element={
                     <ProtectedRoute allowedRoles={["ADMIN"]}>
-                        <StudentsPage />
+                        <Layout>
+                            <StudentsPage />
+                        </Layout>
                     </ProtectedRoute>
                 }
             />
@@ -38,7 +45,9 @@ function App() {
                 path="/courses"
                 element={
                     <ProtectedRoute allowedRoles={["ADMIN", "STUDENT"]}>
-                        <CoursesPage />
+                        <Layout>
+                            <CoursesPage />
+                        </Layout>
                     </ProtectedRoute>
                 }
             />
@@ -47,7 +56,9 @@ function App() {
                 path="/enrollments"
                 element={
                     <ProtectedRoute allowedRoles={["ADMIN"]}>
-                        <EnrollmentsPage />
+                        <Layout>
+                            <EnrollmentsPage />
+                        </Layout>
                     </ProtectedRoute>
                 }
             />
@@ -55,8 +66,10 @@ function App() {
             <Route
                 path="/my-courses"
                 element={
-                    <ProtectedRoute>
-                        <MyCoursesPage />
+                    <ProtectedRoute allowedRoles={["STUDENT"]}>
+                        <Layout>
+                            <MyCoursesPage />
+                        </Layout>
                     </ProtectedRoute>
                 }
             />
@@ -65,7 +78,9 @@ function App() {
                 path="/schedules"
                 element={
                     <ProtectedRoute allowedRoles={["ADMIN", "STUDENT"]}>
-                        <SchedulesPage />
+                        <Layout>
+                            <SchedulesPage />
+                        </Layout>
                     </ProtectedRoute>
                 }
             />

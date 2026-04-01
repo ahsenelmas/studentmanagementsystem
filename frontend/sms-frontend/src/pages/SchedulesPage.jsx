@@ -131,11 +131,18 @@ function SchedulesPage() {
 
             const endpoint = isAdmin ? "/schedules" : "/schedules/my";
             const res = await axios.get(endpoint);
-            const data = Array.isArray(res.data) ? res.data : [];
+            const data = Array.isArray(res.data) ? res.data : res.data.content || [];
 
             setSchedules(data);
         } catch (err) {
-            setError("Failed to load schedules.");
+            console.error("Schedules fetch error:", err);
+
+            const backendMessage =
+                err.response?.data?.message ||
+                err.response?.data?.error ||
+                `Status: ${err.response?.status || "unknown"}`;
+
+            setError(`Failed to load schedules. ${backendMessage}`);
         } finally {
             setLoading(false);
         }
@@ -145,11 +152,18 @@ function SchedulesPage() {
         try {
             const endpoint = isAdmin ? "/courses" : "/courses/my";
             const res = await axios.get(endpoint);
-            const data = Array.isArray(res.data) ? res.data : [];
+            const data = Array.isArray(res.data) ? res.data : res.data.content || [];
 
             setCourses(data);
         } catch (err) {
-            setError("Failed to load courses.");
+            console.error("Courses fetch error:", err);
+
+            const backendMessage =
+                err.response?.data?.message ||
+                err.response?.data?.error ||
+                `Status: ${err.response?.status || "unknown"}`;
+
+            setError(`Failed to load courses. ${backendMessage}`);
         }
     };
 
@@ -353,7 +367,6 @@ function SchedulesPage() {
 
     return (
         <div className="app-shell">
-            <Navbar />
 
             <main className="page-wrapper">
                 <section className="page-header-row">

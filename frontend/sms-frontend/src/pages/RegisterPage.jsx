@@ -9,6 +9,7 @@ function RegisterPage() {
         username: "",
         email: "",
         password: "",
+        studentId: "",
     });
 
     const [message, setMessage] = useState("");
@@ -27,7 +28,12 @@ function RegisterPage() {
         setError("");
 
         try {
-            const response = await api.post("/auth/register", formData);
+            const payload = {
+                ...formData,
+                studentId: Number(formData.studentId),
+            };
+
+            const response = await api.post("/auth/register", payload);
             setMessage(response.data);
             setTimeout(() => navigate("/login"), 1200);
         } catch (err) {
@@ -64,6 +70,15 @@ function RegisterPage() {
                         name="password"
                         placeholder="Password"
                         value={formData.password}
+                        onChange={handleChange}
+                        required
+                    />
+
+                    <input
+                        type="number"
+                        name="studentId"
+                        placeholder="Student ID"
+                        value={formData.studentId}
                         onChange={handleChange}
                         required
                     />

@@ -26,4 +26,6 @@ public class RegisterRequest {
             message = "Password must contain at least one letter and one number"
     )
     private String password;
+
+    private Long studentId;
 }

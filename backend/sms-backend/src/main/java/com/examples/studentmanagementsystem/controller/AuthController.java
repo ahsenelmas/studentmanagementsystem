@@ -4,7 +4,9 @@ import com.examples.studentmanagementsystem.dto.request.LoginRequest;
 import com.examples.studentmanagementsystem.dto.request.RegisterRequest;
 import com.examples.studentmanagementsystem.dto.response.AuthResponse;
 import com.examples.studentmanagementsystem.entity.Role;
+import com.examples.studentmanagementsystem.entity.Student;
 import com.examples.studentmanagementsystem.entity.User;
+import com.examples.studentmanagementsystem.repository.StudentRepository;
 import com.examples.studentmanagementsystem.repository.UserRepository;
 import com.examples.studentmanagementsystem.security.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +16,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import com.examples.studentmanagementsystem.dto.response.StudentOptionResponse;
 
 @Tag(name = "Authentication API", description = "User authentication and authorization")
 @RestController
@@ -21,15 +24,18 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final UserRepository userRepository;
+    private final StudentRepository studentRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
     public AuthController(UserRepository userRepository,
+                          StudentRepository studentRepository,
                           PasswordEncoder passwordEncoder,
                           JwtService jwtService,
                           AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
+        this.studentRepository = studentRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
@@ -47,15 +53,41 @@ public class AuthController {
             throw new RuntimeException("Email already exists");
         }
 
+        if (request.getStudentId() == null) {
+            throw new RuntimeException("Student ID is required");
+        }
+
+        Student student = studentRepository.findById(request.getStudentId())
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        if (student.getUser() != null) {
+            throw new RuntimeException("This student already has an account");
+        }
+
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.STUDENT)
+                .student(student)
                 .build();
 
         userRepository.save(user);
         return "User registered successfully";
+    }
+
+    @Operation(summary = "Get student options for registration")
+    @GetMapping("/student-options")
+    public java.util.List<StudentOptionResponse> getStudentOptions() {
+        return studentRepository.findAll()
+                .stream()
+                .filter(student -> student.getUser() == null)
+                .map(student -> new StudentOptionResponse(
+                        student.getId(),
+                        student.getStudentNumber(),
+                        student.getFirstName() + " " + student.getLastName()
+                ))
+                .toList();
     }
 
     @Operation(summary = "Login and get JWT token")

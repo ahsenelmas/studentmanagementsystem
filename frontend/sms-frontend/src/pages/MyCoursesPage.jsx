@@ -10,10 +10,21 @@ function MyCoursesPage() {
     const fetchCourses = async () => {
         try {
             setLoading(true);
-            const res = await axios.get("/courses");
-            setCourses(Array.isArray(res.data) ? res.data : []);
+            setError("");
+
+            const res = await axios.get("/courses/my");
+            const data = Array.isArray(res.data) ? res.data : res.data.content || [];
+
+            setCourses(data);
         } catch (err) {
-            setError("Failed to load courses.");
+            console.error("My courses fetch error:", err);
+
+            const backendMessage =
+                err.response?.data?.message ||
+                err.response?.data?.error ||
+                `Status: ${err.response?.status || "unknown"}`;
+
+            setError(`Failed to load courses. ${backendMessage}`);
         } finally {
             setLoading(false);
         }
@@ -25,7 +36,6 @@ function MyCoursesPage() {
 
     return (
         <div className="app-shell">
-            <Navbar />
 
             <main className="page-wrapper">
                 <section className="page-header-row">
@@ -33,7 +43,7 @@ function MyCoursesPage() {
                         <p className="section-badge">Student Portal</p>
                         <h1 className="page-title">My Courses</h1>
                         <p className="page-subtitle">
-                            Browse your available courses in a modern view.
+                            Browse your enrolled courses in a modern view.
                         </p>
                     </div>
                 </section>
@@ -41,32 +51,32 @@ function MyCoursesPage() {
                 {loading && <p className="info-text">Loading courses...</p>}
                 {error && <p className="error-text">{error}</p>}
 
-                <div className="course-grid">
-                    {courses.map((course) => (
-                        <div key={course.id} className="course-card">
-                            <div className="course-header">
-                                <span className="course-code">
-                                    {course.courseCode}
-                                </span>
-                                <span className="course-credit">
-                                    {course.credit} ECTS
-                                </span>
+                {!loading && !error && courses.length === 0 && (
+                    <p className="info-text">No courses found for your account.</p>
+                )}
+
+                {!loading && !error && courses.length > 0 && (
+                    <div className="course-grid">
+                        {courses.map((course) => (
+                            <div key={course.id} className="course-card">
+                                <div className="course-header">
+                                    <span className="course-code">{course.courseCode}</span>
+                                    <span className="course-credit">{course.credit} ECTS</span>
+                                </div>
+
+                                <h2 className="course-title">{course.courseName}</h2>
+
+                                <p className="course-description">
+                                    {course.description || "No description available."}
+                                </p>
+
+                                <div className="course-footer">
+                                    <span className="course-tag">My Course</span>
+                                </div>
                             </div>
-
-                            <h2 className="course-title">
-                                {course.courseName}
-                            </h2>
-
-                            <p className="course-description">
-                                {course.description || "No description available."}
-                            </p>
-
-                            <div className="course-footer">
-                                <span className="course-tag">Course</span>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )}
             </main>
         </div>
     );

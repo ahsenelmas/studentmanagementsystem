@@ -13,6 +13,10 @@ function Navbar() {
         navigate("/login");
     };
 
+    const toggleTheme = () => {
+        document.body.classList.toggle("dark");
+    };
+
     const isActive = (path) => location.pathname === path;
 
     return (
@@ -64,7 +68,6 @@ function Navbar() {
 
                 {role === "STUDENT" && (
                     <>
-
                         <Link
                             to="/my-courses"
                             className={`nav-link ${isActive("/my-courses") ? "active-link" : ""}`}
@@ -80,6 +83,10 @@ function Navbar() {
                         </Link>
                     </>
                 )}
+
+                <button onClick={toggleTheme} className="secondary-btn">
+                    🌙
+                </button>
 
                 <button onClick={handleLogout} className="logout-btn">
                     Logout

@@ -54,14 +54,19 @@ function DashboardPage() {
                     schedules: schedulesData.length,
                 });
             } else {
-                const [coursesRes, schedulesRes] = await Promise.all([
-                    axios.get("/courses"),
-                    axios.get("/schedules"),
+                const [coursesRes, enrollmentsRes, schedulesRes] = await Promise.all([
+                    axios.get("/courses/my"),
+                    axios.get("/enrollments/my"),
+                    axios.get("/schedules/my"),
                 ]);
 
                 const coursesData = Array.isArray(coursesRes.data)
                     ? coursesRes.data
                     : coursesRes.data.content || [];
+
+                const enrollmentsData = Array.isArray(enrollmentsRes.data)
+                    ? enrollmentsRes.data
+                    : enrollmentsRes.data.content || [];
 
                 const schedulesData = Array.isArray(schedulesRes.data)
                     ? schedulesRes.data
@@ -70,13 +75,19 @@ function DashboardPage() {
                 setStats({
                     students: 0,
                     courses: coursesData.length,
-                    enrollments: 0,
+                    enrollments: enrollmentsData.length,
                     schedules: schedulesData.length,
                 });
             }
-        } catch (error) {
-            console.error("Dashboard stats error:", error);
-            setError("Failed to load dashboard data.");
+        } catch (err) {
+            console.error("Dashboard stats error:", err);
+
+            const backendMessage =
+                err.response?.data?.message ||
+                err.response?.data?.error ||
+                `Status: ${err.response?.status || "unknown"}`;
+
+            setError(`Failed to load dashboard data. ${backendMessage}`);
         } finally {
             setLoading(false);
         }
@@ -84,11 +95,10 @@ function DashboardPage() {
 
     useEffect(() => {
         fetchDashboardStats();
-    }, []);
+    }, [isAdmin]);
 
     return (
         <div className="app-shell">
-            <Navbar />
 
             <main className="page-wrapper">
                 <section className="hero-card">
@@ -102,7 +112,7 @@ function DashboardPage() {
                         <p className="page-subtitle">
                             {isAdmin
                                 ? "Welcome to your Student Management System. Here you can manage students, courses, enrollments, and schedules in one place."
-                                : `Welcome, ${username}. Here you can explore courses and view your schedule.`}
+                                : `Welcome, ${username}. Here you can explore your courses, enrollments, and schedule.`}
                         </p>
                     </div>
                 </section>
@@ -154,9 +164,15 @@ function DashboardPage() {
                     <>
                         <section className="stats-grid">
                             <div className="stat-card">
-                                <h3>Available Courses</h3>
+                                <h3>My Courses</h3>
                                 <p className="stat-number">{loading ? "..." : stats.courses}</p>
-                                <span className="stat-note">Courses you can browse in the system</span>
+                                <span className="stat-note">Courses assigned to you</span>
+                            </div>
+
+                            <div className="stat-card">
+                                <h3>My Enrollments</h3>
+                                <p className="stat-number">{loading ? "..." : stats.enrollments}</p>
+                                <span className="stat-note">Your active enrollment records</span>
                             </div>
 
                             <div className="stat-card">
@@ -169,9 +185,8 @@ function DashboardPage() {
                         <section className="content-card">
                             <h2>Student Overview</h2>
                             <p>
-                                From here, you can browse courses and check your schedule. This
-                                student dashboard is designed to give a simpler and cleaner view
-                                without management functions.
+                                From here, you can browse your enrolled courses, view your
+                                enrollments, and check your personal weekly schedule.
                             </p>
                         </section>
                     </>

@@ -24,7 +24,6 @@ function EnrollmentsPage() {
         studentId: "",
         courseId: "",
         enrollmentDate: "",
-        status: "ACTIVE",
     });
 
     const resetForm = () => {
@@ -32,7 +31,6 @@ function EnrollmentsPage() {
             studentId: "",
             courseId: "",
             enrollmentDate: "",
-            status: "ACTIVE",
         });
         setIsEditMode(false);
         setEditingEnrollmentId(null);
@@ -201,7 +199,6 @@ function EnrollmentsPage() {
             studentId: String(enrollment.studentId || enrollment.student?.id || ""),
             courseId: String(enrollment.courseId || enrollment.course?.id || ""),
             enrollmentDate: enrollment.enrollmentDate || "",
-            status: enrollment.status || "ACTIVE",
         });
 
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -220,7 +217,6 @@ function EnrollmentsPage() {
                 studentId: Number(formData.studentId),
                 courseId: Number(formData.courseId),
                 enrollmentDate: formData.enrollmentDate,
-                status: formData.status,
             };
 
             if (isEditMode && editingEnrollmentId) {
@@ -308,7 +304,6 @@ function EnrollmentsPage() {
 
     return (
         <div className="app-shell">
-            <Navbar />
 
             <main className="page-wrapper">
                 <section className="page-header-row">
@@ -391,21 +386,6 @@ function EnrollmentsPage() {
                                         required
                                     />
                                 </div>
-
-                                <div className="form-group">
-                                    <label>Status</label>
-                                    <select
-                                        name="status"
-                                        value={formData.status}
-                                        onChange={handleChange}
-                                        className="modern-select"
-                                        required
-                                    >
-                                        <option value="ACTIVE">ACTIVE</option>
-                                        <option value="COMPLETED">COMPLETED</option>
-                                        <option value="CANCELLED">CANCELLED</option>
-                                    </select>
-                                </div>
                             </div>
 
                             <div className="form-actions">
@@ -433,7 +413,7 @@ function EnrollmentsPage() {
                     <div className="toolbar">
                         <input
                             type="text"
-                            placeholder="Search by student, course, date, status..."
+                            placeholder="Search by student, course, date ..."
                             className="search-input"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -457,7 +437,6 @@ function EnrollmentsPage() {
                                     <th>Student</th>
                                     <th>Course</th>
                                     <th>Enrollment Date</th>
-                                    <th>Status</th>
                                     {isAdmin && <th>Actions</th>}
                                 </tr>
                                 </thead>
@@ -468,7 +447,6 @@ function EnrollmentsPage() {
                                         <td>{getStudentDisplay(enrollment)}</td>
                                         <td>{getCourseDisplay(enrollment)}</td>
                                         <td>{getEnrollmentDate(enrollment)}</td>
-                                        <td>{getStatus(enrollment)}</td>
 
                                         {isAdmin && (
                                             <td>
