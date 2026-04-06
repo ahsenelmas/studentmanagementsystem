@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios.js";
 
@@ -12,13 +12,32 @@ function RegisterPage() {
         studentId: "",
     });
 
+    const [students, setStudents] = useState([]);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
+    const [loadingStudents, setLoadingStudents] = useState(true);
+
+    useEffect(() => {
+        fetchStudents();
+    }, []);
+
+    const fetchStudents = async () => {
+        try {
+            const response = await api.get("/auth/student-options");
+            setStudents(response.data);
+        } catch (err) {
+            console.error("Failed to load students:", err);
+            setError("Could not load student list.");
+        } finally {
+            setLoadingStudents(false);
+        }
+    };
 
     const handleChange = (e) => {
+        const { name, value } = e.target;
         setFormData((prev) => ({
             ...prev,
-            [e.target.name]: e.target.value,
+            [name]: value,
         }));
     };
 
@@ -29,15 +48,24 @@ function RegisterPage() {
 
         try {
             const payload = {
-                ...formData,
+                username: formData.username,
+                email: formData.email,
+                password: formData.password,
                 studentId: Number(formData.studentId),
             };
 
             const response = await api.post("/auth/register", payload);
-            setMessage(response.data);
-            setTimeout(() => navigate("/login"), 1200);
+            setMessage(typeof response.data === "string" ? response.data : "Registration successful!");
+
+            setTimeout(() => {
+                navigate("/login");
+            }, 1200);
         } catch (err) {
-            setError(err.response?.data?.message || "Registration failed");
+            setError(
+                err.response?.data?.message ||
+                err.response?.data ||
+                "Registration failed"
+            );
         }
     };
 
@@ -74,14 +102,23 @@ function RegisterPage() {
                         required
                     />
 
-                    <input
-                        type="number"
+                    <select
                         name="studentId"
-                        placeholder="Student ID"
                         value={formData.studentId}
                         onChange={handleChange}
                         required
-                    />
+                        disabled={loadingStudents}
+                    >
+                        <option value="">
+                            {loadingStudents ? "Loading students..." : "Select Student"}
+                        </option>
+
+                        {students.map((student) => (
+                            <option key={student.id} value={student.id}>
+                                {student.fullName} ({student.studentNumber})
+                            </option>
+                        ))}
+                    </select>
 
                     <button type="submit">Register</button>
                 </form>

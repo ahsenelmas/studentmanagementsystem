@@ -43,6 +43,9 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
+                        // Public endpoint for registration student list
+                        .requestMatchers(HttpMethod.GET, "/api/auth/student-options").permitAll()
+
                         // Student self endpoints
                         .requestMatchers(HttpMethod.GET, "/api/courses/my").hasAnyRole("ADMIN", "STUDENT")
                         .requestMatchers(HttpMethod.GET, "/api/enrollments/my").hasAnyRole("ADMIN", "STUDENT")
