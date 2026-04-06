@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import com.examples.studentmanagementsystem.repository.UserRepository;
 
 import java.time.LocalDate;
 
@@ -30,6 +31,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class StudentControllerIntegrationTest {
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private MockMvc mockMvc;
 
     @Autowired
@@ -40,6 +44,7 @@ public class StudentControllerIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        userRepository.deleteAll();
         studentRepository.deleteAll();
     }
 

@@ -169,6 +169,35 @@ public class StudentServiceImplTest {
     }
 
     @Test
+    void updateStudent_ShouldKeepSameStudentNumber_WhenNumberNotChanged() {
+        Student existingStudent = createSampleStudent();
+
+        Student updatedData = Student.builder()
+                .studentNumber("S12345")
+                .firstName("UpdatedAhsen")
+                .lastName("UpdatedElmas")
+                .birthDate(LocalDate.of(2003, 5, 10))
+                .phone("555555555")
+                .department("Software Engineering")
+                .build();
+
+        when(studentRepository.findById(1L)).thenReturn(Optional.of(existingStudent));
+        when(studentRepository.save(any(Student.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Student updatedStudent = studentService.updateStudent(1L, updatedData);
+
+        assertNotNull(updatedStudent);
+        assertEquals("S12345", updatedStudent.getStudentNumber());
+        assertEquals("UpdatedAhsen", updatedStudent.getFirstName());
+        assertEquals("UpdatedElmas", updatedStudent.getLastName());
+        assertEquals("Software Engineering", updatedStudent.getDepartment());
+
+        verify(studentRepository, times(1)).findById(1L);
+        verify(studentRepository, never()).existsByStudentNumber(anyString());
+        verify(studentRepository, times(1)).save(existingStudent);
+    }
+
+    @Test
     void deleteStudent_ShouldDeleteStudent_WhenStudentExists() {
         Student student = createSampleStudent();
 

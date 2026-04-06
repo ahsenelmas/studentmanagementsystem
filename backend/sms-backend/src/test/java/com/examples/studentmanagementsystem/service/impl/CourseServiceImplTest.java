@@ -136,6 +136,33 @@ public class CourseServiceImplTest {
     }
 
     @Test
+    public void updateCourse_ShouldKeepSameCourseCode_WhenCodeNotChanged() {
+        Course existingCourse = createSampleCourse();
+
+        Course updatedData = Course.builder()
+                .courseCode("CSE101")
+                .courseName("Updated Name")
+                .credit(5)
+                .description("Updated description")
+                .build();
+
+        when(courseRepository.findById(1L)).thenReturn(Optional.of(existingCourse));
+        when(courseRepository.save(any(Course.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Course updatedCourse = courseService.updateCourse(1L, updatedData);
+
+        assertNotNull(updatedCourse);
+        assertEquals("CSE101", updatedCourse.getCourseCode());
+        assertEquals("Updated Name", updatedCourse.getCourseName());
+        assertEquals(5, updatedCourse.getCredit());
+        assertEquals("Updated description", updatedCourse.getDescription());
+
+        verify(courseRepository, times(1)).findById(1L);
+        verify(courseRepository, never()).existsByCourseCode(anyString());
+        verify(courseRepository, times(1)).save(existingCourse);
+    }
+
+    @Test
     public void updateCourse_ShouldThrowDuplicateResourceException_WhenNewCourseCodeAlreadyExists() {
         Course existingCourse = createSampleCourse();
 

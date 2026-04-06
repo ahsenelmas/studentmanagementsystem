@@ -3,7 +3,9 @@ package com.examples.studentmanagementsystem.controller;
 import com.examples.studentmanagementsystem.dto.request.LoginRequest;
 import com.examples.studentmanagementsystem.dto.request.RegisterRequest;
 import com.examples.studentmanagementsystem.entity.Role;
+import com.examples.studentmanagementsystem.entity.Student;
 import com.examples.studentmanagementsystem.entity.User;
+import com.examples.studentmanagementsystem.repository.StudentRepository;
 import com.examples.studentmanagementsystem.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +17,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.time.LocalDate;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.notNullValue;
@@ -36,19 +40,37 @@ class AuthControllerIntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
+    private StudentRepository studentRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void setUp() {
         userRepository.deleteAll();
+        studentRepository.deleteAll();
+    }
+
+    private Student createSampleStudent() {
+        Student student = new Student();
+        student.setStudentNumber("S12345");
+        student.setFirstName("Ahsen");
+        student.setLastName("Elmas");
+        student.setBirthDate(LocalDate.of(2003, 5, 10));
+        student.setPhone("123456789");
+        student.setDepartment("Computer Engineering");
+        return studentRepository.save(student);
     }
 
     @Test
     void register_ShouldCreateUserSuccessfully() throws Exception {
+        Student student = createSampleStudent();
+
         RegisterRequest request = new RegisterRequest();
         request.setUsername("student1");
         request.setEmail("student1@test.com");
         request.setPassword("pass123");
+        request.setStudentId(student.getId());
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -81,11 +103,14 @@ class AuthControllerIntegrationTest {
 
     @Test
     void register_ShouldFail_WhenUsernameAlreadyExists() throws Exception {
+        Student student = createSampleStudent();
+
         User existingUser = User.builder()
                 .username("student1")
                 .email("existing@test.com")
                 .password(passwordEncoder.encode("pass123"))
                 .role(Role.STUDENT)
+                .student(student)
                 .build();
 
         userRepository.save(existingUser);
@@ -94,6 +119,7 @@ class AuthControllerIntegrationTest {
         request.setUsername("student1");
         request.setEmail("newmail@test.com");
         request.setPassword("pass123");
+        request.setStudentId(student.getId());
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -104,11 +130,14 @@ class AuthControllerIntegrationTest {
 
     @Test
     void register_ShouldFail_WhenEmailAlreadyExists() throws Exception {
+        Student student = createSampleStudent();
+
         User existingUser = User.builder()
                 .username("existinguser")
                 .email("student1@test.com")
                 .password(passwordEncoder.encode("pass123"))
                 .role(Role.STUDENT)
+                .student(student)
                 .build();
 
         userRepository.save(existingUser);
@@ -117,6 +146,7 @@ class AuthControllerIntegrationTest {
         request.setUsername("student1");
         request.setEmail("student1@test.com");
         request.setPassword("pass123");
+        request.setStudentId(student.getId());
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
