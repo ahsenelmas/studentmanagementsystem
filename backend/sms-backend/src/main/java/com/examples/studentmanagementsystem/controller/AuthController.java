@@ -3,9 +3,12 @@ package com.examples.studentmanagementsystem.controller;
 import com.examples.studentmanagementsystem.dto.request.LoginRequest;
 import com.examples.studentmanagementsystem.dto.request.RegisterRequest;
 import com.examples.studentmanagementsystem.dto.response.AuthResponse;
+import com.examples.studentmanagementsystem.dto.response.StudentOptionResponse;
 import com.examples.studentmanagementsystem.entity.Role;
 import com.examples.studentmanagementsystem.entity.Student;
 import com.examples.studentmanagementsystem.entity.User;
+import com.examples.studentmanagementsystem.exception.DuplicateResourceException;
+import com.examples.studentmanagementsystem.exception.ResourceNotFoundException;
 import com.examples.studentmanagementsystem.repository.StudentRepository;
 import com.examples.studentmanagementsystem.repository.UserRepository;
 import com.examples.studentmanagementsystem.security.JwtService;
@@ -16,7 +19,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import com.examples.studentmanagementsystem.dto.response.StudentOptionResponse;
+
+import java.util.List;
 
 @Tag(name = "Authentication API", description = "User authentication and authorization")
 @RestController
@@ -46,22 +50,22 @@ public class AuthController {
     public String register(@RequestBody @Valid RegisterRequest request) {
 
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username already exists");
+            throw new DuplicateResourceException("Username already exists");
         }
 
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already exists");
+            throw new DuplicateResourceException("Email already exists");
         }
 
         if (request.getStudentId() == null) {
-            throw new RuntimeException("Student ID is required");
+            throw new IllegalArgumentException("Student ID is required");
         }
 
         Student student = studentRepository.findById(request.getStudentId())
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
 
         if (student.getUser() != null) {
-            throw new RuntimeException("This student already has an account");
+            throw new DuplicateResourceException("This student already has an account");
         }
 
         User user = User.builder()
@@ -78,7 +82,7 @@ public class AuthController {
 
     @Operation(summary = "Get student options for registration")
     @GetMapping("/student-options")
-    public java.util.List<StudentOptionResponse> getStudentOptions() {
+    public List<StudentOptionResponse> getStudentOptions() {
         return studentRepository.findAll()
                 .stream()
                 .filter(student -> student.getUser() == null)
@@ -102,7 +106,7 @@ public class AuthController {
         );
 
         User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         String token = jwtService.generateToken(request.getUsername());
 
